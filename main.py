@@ -36,7 +36,7 @@ class main(customtkinter.CTk):
         #input textbox
         self.input_textbox = customtkinter.CTkTextbox(self, font=('Arial', 12))
         self.input_textbox.grid(row=1, columnspan=3, sticky="NSEW")
-        self.input = self.input_textbox.get("0.0", "end")
+        
 
         #customization and conversion menu
         self.customization_frame = customtkinter.CTkFrame(self, corner_radius=5)
@@ -52,11 +52,11 @@ class main(customtkinter.CTk):
         self.fontin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="12pt.")
         self.fontin.grid(row=1, column=0, padx=5, pady=2.5)
 
-        self.bldin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="25%")
+        self.bldin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="30%")
         self.bldin.grid(row=1, column=1, padx=5, pady=2.5)
         self.bld = self.bldin.get()
 
-        self.process_button = customtkinter.CTkButton(self.customization_frame, text="Submit", width=100, height=30, command=self.process_text(self.input, self.bld))
+        self.process_button = customtkinter.CTkButton(self.customization_frame, text="Submit", width=100, height=30, command=self.process_text)
         self.process_button.grid(row=1, column=2, padx=5, pady=2.5)
 
         #export menu
@@ -75,31 +75,52 @@ class main(customtkinter.CTk):
         self.docx_button = customtkinter.CTkButton(self.export_frame, text="DOCX", width=75, height=30)
         self.docx_button.grid(row=1, column=1, padx=5, pady=2.5)
 
-        
+    
+    def process_text(self):
+        self.input = self.input_textbox.get("1.0", 'end-1c')    #read input data
 
-    #TODO: fix writing to file
-    def process_text(self, input: str, bldp: str):
-        if(bldp==''):
-            self.int_bldp=25
+        #defaults bold percentage
+        if(self.bld==''):
+            self.int_bldp=30
         else:
-             self.int_bldp = int(bldp)
-       
-        #opens new file to write formatted input text
-        self.taggedfile = open("tagged_text.txt", "w+")
+             self.int_bldp = int(self.bld)
 
-        #splits text into array of words
-        self.split_text = input.split()
+        self.formatted_text = ""
 
         #loops through array to format text with bold tags
-        for word in self.split_text:
+        for word in self.input.split():
             eindex=0
-            eindex = round(word.len()*(self.int_bldp/100))   #calculates the section to bold
+            eindex = round(len(word)*(self.int_bldp/100))   #calculates the section to bold
 
-            self.taggedfile.write("<b>"+word[:eindex]+"<b>"+word[eindex:]+" ")  #formats text with corresponding tags
+            self.formatted_word = ("<b>"+word[:eindex]+"</b>"+word[eindex:])  #formats text with corresponding tags
+            self.formatted_text += self.formatted_word + " "    #formats word
 
-        #closes txt file
-        self.taggedfile.close()
+        #creates output file
+        with open('tagged_text.txt', 'w') as f:
+            f.write(self.formatted_text)
 
+        f.close #close output file
+
+        self.input_textbox.delete("1.0", "end")
+
+        #TODO: Fix bolding and output
+        self.input_textbox.tag_config("bold", font=("Arial", 12, "bold"))
+
+        for word in self.formatted_text.split():
+            start = word.find('<b>')+3
+            end = word.find('</b>')+3
+
+            cutword = word[start:end]
+            leftover = word[end:len(word)]
+
+            removedstartb = cutword.replace('<b>', '')
+            removedendb = removedstartb.replace('</b>', '')
+            
+            self.input_textbox.insert('end', removedendb, "bold")
+            self.input_textbox.insert('end', leftover+' ')
+        
+
+        
 
 
 if __name__ == "__main__":
