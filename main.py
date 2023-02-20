@@ -1,4 +1,6 @@
+import tkinter as tk
 import customtkinter
+import math
 
 class main(customtkinter.CTk):
     def __init__(self):
@@ -34,7 +36,8 @@ class main(customtkinter.CTk):
         self.url_input.grid(row=1, column=1, pady=2)
 
         #input textbox
-        self.input_textbox = customtkinter.CTkTextbox(self, font=('Arial', 12))
+        self.input_textbox = tk.Text(self, font=('Arial', 12))
+        self.input_textbox.configure(background=('#242424'),foreground='white', insertbackground='white')
         self.input_textbox.grid(row=1, columnspan=3, sticky="NSEW")
         
 
@@ -49,7 +52,7 @@ class main(customtkinter.CTk):
         self.processing_label.grid(row=0, columnspan=3)
 
         #TODO: validate input
-        self.fontin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="12pt.")
+        self.fontin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="15pt.")
         self.fontin.grid(row=1, column=0, padx=5, pady=2.5)
 
         self.bldin = customtkinter.CTkEntry(self.customization_frame, width=40, placeholder_text="30%")
@@ -75,8 +78,16 @@ class main(customtkinter.CTk):
         self.docx_button = customtkinter.CTkButton(self.export_frame, text="DOCX", width=75, height=30)
         self.docx_button.grid(row=1, column=1, padx=5, pady=2.5)
 
-    
+
+
+
     def process_text(self):
+        #bold text with tags <b> and </b>
+        bold = customtkinter.CTkFont(family="Arial",size=15,weight="bold")
+        normal = customtkinter.CTkFont(family="Arial",size=15,weight="normal")
+        self.input_textbox.tag_config("normal", font=normal)
+        self.input_textbox.tag_config("bold", font=bold)
+
         self.input = self.input_textbox.get("1.0", 'end-1c')    #read input data
 
         #defaults bold percentage
@@ -90,7 +101,7 @@ class main(customtkinter.CTk):
         #loops through array to format text with bold tags
         for word in self.input.split():
             eindex=0
-            eindex = round(len(word)*(self.int_bldp/100))   #calculates the section to bold
+            eindex = math.ceil(len(word)*(self.int_bldp/100))   #calculates the section to bold
 
             self.formatted_word = ("<b>"+word[:eindex]+"</b>"+word[eindex:])  #formats text with corresponding tags
             self.formatted_text += self.formatted_word + " "    #formats word
@@ -99,29 +110,24 @@ class main(customtkinter.CTk):
         with open('tagged_text.txt', 'w') as f:
             f.write(self.formatted_text)
 
-        f.close #close output file
-
         self.input_textbox.delete("1.0", "end")
 
-        #TODO: Fix bolding and output
-        self.input_textbox.tag_config("bold", font=("Arial", 12, "bold"))
+       
 
         for word in self.formatted_text.split():
             start = word.find('<b>')+3
-            end = word.find('</b>')+3
+            cut = word.find('</b>')+4
+            end = len(word)
 
-            cutword = word[start:end]
-            leftover = word[end:len(word)]
+            leftover = word[cut:len(word)]
+            beginning = word[0:cut-4]
 
-            removedstartb = cutword.replace('<b>', '')
+            removedstartb = beginning.replace('<b>', '')
             removedendb = removedstartb.replace('</b>', '')
-            
+
             self.input_textbox.insert('end', removedendb, "bold")
-            self.input_textbox.insert('end', leftover+' ')
+            self.input_textbox.insert('end', leftover+' ', "normal")
         
-
-        
-
 
 if __name__ == "__main__":
     app = main()
