@@ -1,28 +1,14 @@
 import math
-import re
 import tkinter as tk
 import urllib.request
 from fpdf import FPDF
 import bs4 as bs
 import customtkinter
 import nltk
-import pandas as pd
 from nltk.corpus import stopwords
-import subprocess
-import os
 
 nltk.download('punkt')
 nltk.download('stopwords')
-
-writetag_path= os.path.join(os.path.dirname(__file__), "WriteTag.php")
-
-class PDF(FPDF):
-    pass
-
-def php(writetag_path):
-    p = subprocess.Popen(['php', writetag_path], stdout=subprocess.PIPE)
-    result = p.communicate()[0]
-    return result
 
 class main(customtkinter.CTk):
     def __init__(self):
@@ -96,7 +82,7 @@ class main(customtkinter.CTk):
         self.export_label = customtkinter.CTkLabel(self.export_frame, text="Export", fg_color="transparent", font=('Arial', 18, 'bold'))
         self.export_label.grid(row=0, columnspan=2)
 
-        self.pdf_button = customtkinter.CTkButton(self.export_frame, text="PDF", width=75, height=30)
+        self.pdf_button = customtkinter.CTkButton(self.export_frame, text="PDF", width=75, height=30, command=self.export_pdf)
         self.pdf_button.grid(row=1, column=0, padx=5, pady=2.5)
 
         self.docx_button = customtkinter.CTkButton(self.export_frame, text="DOCX", width=75, height=30)
@@ -188,20 +174,17 @@ class main(customtkinter.CTk):
         self.process_text()
 
     def export_pdf(self):
-        php()
     
-        pdf = PDF(orientation='P', unit='pt', format='A4')
+        pdf = FPDF(orientation='P', unit='pt', format='A4')
         pdf.add_page()
-        pdf.set_font('Arial', '', self.int_fontsize)
-        pdf.SetStyle("b", "Arial", "B", self.int_fontsize)
-        pdf.SetStyle("p", "Arial", "N", self.int_fontsize)
+        pdf.set_font('Courier', '', self.int_fontsize)
 
         with open('tagged_text.txt', 'r') as f:
             text = f.read()
+        ptext = "<p>"+text+"</p>"
+        pdf.write_html(ptext)
 
-        pdf.WriteTag(0, 0, text, 0, "L", 0, 0)
-
-        pdf.output()
+        pdf.output('SpeedReader.pdf')
 
 if __name__ == "__main__":
     app = main()
