@@ -1,22 +1,21 @@
 import math
 import tkinter as tk
 import urllib.request
-from fpdf import FPDF, HTMLMixin
 import bs4 as bs
 import customtkinter
 import nltk
 from nltk.corpus import stopwords
-import os
+import subprocess
+import sys
 
 nltk.download('punkt')
 nltk.download('stopwords')
 
-class PDF(FPDF, HTMLMixin):
-    pass
-
 class main(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
         #window theme
         customtkinter.set_appearance_mode("dark")
