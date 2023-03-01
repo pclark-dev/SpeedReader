@@ -1,19 +1,23 @@
 import math
 import tkinter as tk
 import urllib.request
-from fpdf import FPDF
+from fpdf import FPDF, HTMLMixin
 import bs4 as bs
 import customtkinter
 import nltk
 from nltk.corpus import stopwords
+import os
 
 nltk.download('punkt')
 nltk.download('stopwords')
 
+class PDF(FPDF, HTMLMixin):
+    pass
+
 class main(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        
+
         #window theme
         customtkinter.set_appearance_mode("dark")
         customtkinter.set_default_color_theme("dark-blue")
@@ -72,21 +76,19 @@ class main(customtkinter.CTk):
         self.process_button = customtkinter.CTkButton(self.customization_frame, text="Submit", width=100, height=30, command=self.process_input_type)
         self.process_button.grid(row=1, column=2, padx=5, pady=2.5)
 
-        #export menu
-        self.export_frame = customtkinter.CTkFrame(self, corner_radius=5)
-        self.export_frame.grid(row=0, column=2, pady=5, sticky='N', ipadx=20, ipady=5)
+        #clear menu
+        self.clear_frame = customtkinter.CTkFrame(self, corner_radius=5)
+        self.clear_frame.grid(row=0, column=2, pady=5, sticky='N', ipadx=20, ipady=5)
 
-        self.export_frame.grid_columnconfigure((0,1), weight=1)
-        self.export_frame.grid_rowconfigure((0,1), weight=1)
+        self.clear_frame.grid_columnconfigure((0), weight=1)
+        self.clear_frame.grid_rowconfigure((0,1), weight=1)
 
-        self.export_label = customtkinter.CTkLabel(self.export_frame, text="Export", fg_color="transparent", font=('Arial', 18, 'bold'))
+        self.export_label = customtkinter.CTkLabel(self.clear_frame, text="Clear", fg_color="transparent", font=('Arial', 18, 'bold'))
         self.export_label.grid(row=0, columnspan=2)
 
-        self.pdf_button = customtkinter.CTkButton(self.export_frame, text="PDF", width=75, height=30, command=self.export_pdf)
+        self.pdf_button = customtkinter.CTkButton(self.clear_frame,text='', width=75, height=30, command=self.clear)
         self.pdf_button.grid(row=1, column=0, padx=5, pady=2.5)
 
-        self.docx_button = customtkinter.CTkButton(self.export_frame, text="DOCX", width=75, height=30)
-        self.docx_button.grid(row=1, column=1, padx=5, pady=2.5)
 
 
     def process_input_type(self):
@@ -173,18 +175,8 @@ class main(customtkinter.CTk):
         #process text
         self.process_text()
 
-    def export_pdf(self):
-    
-        pdf = FPDF(orientation='P', unit='pt', format='A4')
-        pdf.add_page()
-        pdf.set_font('Courier', '', self.int_fontsize)
-
-        with open('tagged_text.txt', 'r') as f:
-            text = f.read()
-        ptext = "<p>"+text+"</p>"
-        pdf.write_html(ptext)
-
-        pdf.output('SpeedReader.pdf')
+    def clear(self):
+        self.input_textbox.delete("1.0", "end")
 
 if __name__ == "__main__":
     app = main()
